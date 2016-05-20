@@ -90,11 +90,12 @@ function updateUser($id, $pseudo, $password, $HCP){
 
     $user = user($id);
 
-    $pseudo == NULL ? $pseudo = $user['pseudo'] : $pseudo = $pseudo ;
-    $password == NULL ? $password = $user['password'] : $password = $password ;
-    $HCP == NULL ? $HCP = $user['HCP'] : $HCP = $HCP ;
+    $pseudo == null ? $pseudo = $user['pseudo'] : $pseudo = $pseudo ;
+    $password == null ? $password = $user['password'] : $password = $password ;
+    $HCP == null ? $HCP = $user['HCP'] : $HCP = $HCP ;
 
-        $sql = "UPDATE golf_users SET pseudo = :pseudo, password= :pass, HCP = :HCP WHERE id = :id ";
+    if($id != ''){
+    	 $sql = "UPDATE golf_users SET pseudo = :pseudo, password= :pass, HCP = :HCP WHERE id = :id ";
 
         $req = $bdd->prepare($sql);
         $req->execute(array(
@@ -103,7 +104,11 @@ function updateUser($id, $pseudo, $password, $HCP){
             ':HCP' => $HCP,
             ':id' => $id
         ));
+
         return true;
+    }else{
+    	return false;
+    }
 
 }
 
@@ -204,16 +209,16 @@ function updateProfilPicture($imgInfos, $user_id){
 
 }
 
-function enregistrer($joueur_1, $joueur_2, $joueur_3, $joueur_4, $score_1, $score_2, $score_3, $score_4, $nom, $adresse, $nb_trous){
+function enregistrer($joueur_0, $joueur_1, $joueur_2, $joueur_3, $score_0, $score_1, $score_2, $score_3, $nom, $adresse, $nb_trous){
 
     $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
 
    $date = date("Y-m-d H:i:s");
 
-    if(empty($joueur_1) || empty($score_1) || empty($nom) || empty($adresse)){
+    if(empty($joueur_0) || empty($score_0) || empty($nom) || empty($adresse)){
         return false;
     } else{
-        $sql = "INSERT INTO golf_enregistrer (id_joueur_1, id_joueur_2, id_joueur_3, id_joueur_4, score_j1, score_j2 , score_j3 , score_j4, date, nom , adresse , nb_trous) VALUES ('".$joueur_1."','".$joueur_2."','".$joueur_3."','".$joueur_4."','".$score_1."','".$score_2."','".$score_3."','".$score_4."', '".$date."', '".$nom."','".$adresse."','".$nb_trous."')";
+        $sql = "INSERT INTO golf_enregistrer (id_joueur_0, id_joueur_1, id_joueur_2, id_joueur_3, score_j0, score_j1 , score_j2 , score_j3, date, nom , adresse , nb_trous) VALUES ('".$joueur_0."','".$joueur_1."','".$joueur_2."','".$joueur_3."','".$score_0."','".$score_1."','".$score_2."','".$score_3."', '".$date."', '".$nom."','".$adresse."','".$nb_trous."')";
 
         $req = $bdd->prepare($sql);
         $req->execute();
@@ -222,3 +227,140 @@ function enregistrer($joueur_1, $joueur_2, $joueur_3, $joueur_4, $score_1, $scor
     }
 
 }
+
+function allParties($id){
+    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+
+    $sql = "SELECT * FROM golf_enregistrer
+    			WHERE (id_joueur_0 = :id || id_joueur_1 = :id || id_joueur_2 = :id || id_joueur_3 = :id)";
+
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':id' => $id
+    ));
+
+    $response =  array();
+    while ($row = $req->fetch(PDO::FETCH_ASSOC)){
+    	$response[] = $row;
+    }
+    if(count($response) == 0){
+        return false;
+    } else{
+        return $response;
+    } 
+}
+
+function infosPartie($id){
+    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+
+    $sql = "SELECT * FROM golf_enregistrer WHERE id = :id";
+
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':id' => $id
+    ));
+    $result = $req->fetch(PDO::FETCH_ASSOC);
+
+    $joueur = array();
+    if($result['id_joueur_0'] != '0') $joueur[] .= $result['id_joueur_0'];
+    if($result['id_joueur_1'] != '0') $joueur[] .= $result['id_joueur_1'];
+    if($result['id_joueur_2'] != '0') $joueur[] .= $result['id_joueur_2'];
+    if($result['id_joueur_3'] != '0') $joueur[] .= $result['id_joueur_3'];
+
+    $response = array();
+    for($i=0; $i<count($joueur); $i++){
+
+    	$pseudo = "SELECT pseudo FROM golf_users WHERE id = :id_joueur";
+    	$req1 = $bdd->prepare($pseudo);
+	    $req1->execute(array(
+	        ':id_joueur' => $joueur[$i]
+	    ));
+	    $response[] = $req1->fetch(PDO::FETCH_ASSOC);
+    }
+
+    $test = $result + $response;
+
+    return $test;
+}
+
+
+function addFriend($id, $idFriend){
+    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+
+    if(empty($id) || empty($idFriend)){
+        return false;
+    } else{
+        $verifFriend = alreadyFriend($id, $idFriend);
+
+        if($verifFriend == true){
+            $sql = "INSERT INTO golf_amis SET id_mon = :id, id_ami = :idFriend";
+
+	        $req = $bdd->prepare($sql);
+	        $req->execute(array(
+	            ':id' => $id,
+	            ':idFriend' => $idFriend
+	        ));
+            return true;
+        } else{
+            return 'Vous êtes déjà ami.';
+        }
+    }
+}
+
+function alreadyFriend($id, $idFriend){
+
+    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+
+    $sql = "SELECT COUNT(*) AS count FROM golf_amis WHERE id_mon = :id AND id_ami = :idFriend";
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':id' => $id,
+        ':idFriend' => $idFriend
+    ));
+    $result = $req->fetch();
+    if($result['count'] > 0){
+        return false;
+    }else{
+        return true;
+    }
+}
+
+function infosFriend($id){
+    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+
+    $sql = "SELECT * FROM golf_users WHERE id = :id";
+
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':id' => $id
+    ));
+
+    $result = $req->fetch(PDO::FETCH_ASSOC);
+
+    return $result;
+}
+
+function allFriend($id){
+    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+
+    $sql = "SELECT GA.*, GU.*
+    			FROM golf_amis AS GA 
+    			LEFT JOIN golf_users AS GU ON GU.id = GA.id_ami 
+    			WHERE GA.id_mon = :id";
+
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':id' => $id
+    ));
+
+    $response =  array();
+    while ($row = $req->fetch(PDO::FETCH_ASSOC)){
+    	$response[] = $row;
+    }
+    if(count($response) == 0){
+        return false;
+    } else{
+        return $response;
+    } 
+}
+

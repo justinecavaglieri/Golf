@@ -73,7 +73,7 @@ $app->post('/register', function (Request $request) use ($app) {
     $result = userRegistration($post['pseudo'], $post['password'], $post['HCP']);
 
    
-    return $app->json($post, 201);
+    return $app->json($result);
 });
 
 $app->get('/login', function ($pseudo, $password) use ($app) {
@@ -96,7 +96,7 @@ $app->put('/users/edit', function (Request $request) use ($app) {
     return $app->json($result);
 });
 
-$app->post('/users/edit_image', function ($id, $image) use ($app) {
+$app->put('/users/edit_image', function ($id, $image) use ($app) {
 
     $result = updateProfilPicture($image, $id);
 
@@ -106,24 +106,64 @@ $app->post('/users/edit_image', function ($id, $image) use ($app) {
 $app->post('/enregistrer', function (Request $request) use ($app) {
 
      $post = array(
+        'joueur0' => $request->request->get('joueur0'),
         'joueur1' => $request->request->get('joueur1'),
         'joueur2' => $request->request->get('joueur2'),
         'joueur3' => $request->request->get('joueur3'),
-        'joueur4' => $request->request->get('joueur4'),
+        'score0'  => $request->request->get('score0'),
         'score1'  => $request->request->get('score1'),
         'score2'  => $request->request->get('score2'),
         'score3'  => $request->request->get('score3'),
-        'score4'  => $request->request->get('score4'),
         'nom'  => $request->request->get('nom'),
         'adresse'  => $request->request->get('adresse'),
         'nb_trous'  => $request->request->get('nb_trous'),
 
     );
-    $result = enregistrer($post['joueur1'], $post['joueur2'], $post['joueur3'], $post['joueur4'], $post['score1'], $post['score2'], $post['score3'], $post['score4'], $post['nom'], $post['adresse'], $post['nb_trous']);
+    $result = enregistrer($post['joueur0'], $post['joueur1'], $post['joueur2'], $post['joueur3'], $post['score0'], $post['score1'], $post['score2'], $post['score3'], $post['nom'], $post['adresse'], $post['nb_trous']);
 
    
     return $app->json($result);
 });
+
+$app->get('/allParties/{id}', function ($id) use ($app) {
+
+    $result = allParties($id);
+
+    return $app->json($result);
+})->assert('id', '\d+');
+
+$app->get('/partie/{id}', function ($id) use ($app) {
+
+    $result = infosPartie($id);
+
+    return $app->json($result);
+})->assert('id', '\d+');
+
+$app->post('/addFriend', function (Request $request) use ($app) {
+
+     $post = array(
+        'id' => $request->request->get('id'),
+        'idFriend'  => $request->request->get('idFriend'),
+    );
+    $result = addFriend($post['id'], $post['idFriend']);
+
+   
+    return $app->json($result);
+});
+
+$app->get('/friend/{id}', function ($id) use ($app) {
+
+    $result = infosFriend($id);
+
+    return $app->json($result);
+})->assert('id', '\d+');
+
+$app->get('/allfriends/{id}', function ($id) use ($app) {
+
+    $result = allFriend($id);
+
+    return $app->json($result);
+})->assert('id', '\d+');
 
 /*$app->delete('/users/{id}/delete', function ($id) use ($app) {
 
@@ -131,7 +171,6 @@ $app->post('/enregistrer', function (Request $request) use ($app) {
 
     return $app->json($result);
 })->assert('id', '\d+');*/
-
 
 
 
