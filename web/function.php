@@ -1,7 +1,7 @@
 <?php
 
 function user($id){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
     $sql = "SELECT * FROM golf_users WHERE id = :id";
 
     $req = $bdd->prepare($sql);
@@ -16,7 +16,7 @@ function user($id){
 
 
 function userConnection($pseudo, $password){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     if(empty($pseudo) || empty($password)){
         return false;
@@ -43,7 +43,7 @@ function userConnection($pseudo, $password){
 
 
 function userRegistration($pseudo, $password, $HCP){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     if(empty($pseudo) || empty($password) || empty($HCP)){
         return false;
@@ -69,7 +69,7 @@ function userRegistration($pseudo, $password, $HCP){
 
 function isPseudoAvailable($pseudo){
 
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "SELECT COUNT(*) AS count FROM golf_users WHERE pseudo = :psd";
     $req = $bdd->prepare($sql);
@@ -86,7 +86,7 @@ function isPseudoAvailable($pseudo){
 
 function updateUser($id, $pseudo, $password, $HCP){
 
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $user = user($id);
 
@@ -114,7 +114,7 @@ function updateUser($id, $pseudo, $password, $HCP){
 
 function deleteUser ($id){
 
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "DELETE FROM golf_users WHERE id = :id";
 
@@ -129,7 +129,7 @@ function deleteUser ($id){
 
 function updateProfilPicture($imgInfos, $user_id){
 
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     //on définit les extensions autorisées
     $allowedExtensions = array('.gif', '.png' ,'.jpg', '.jpeg');
@@ -211,9 +211,9 @@ function updateProfilPicture($imgInfos, $user_id){
 
 function enregistrer($joueur_0, $joueur_1, $joueur_2, $joueur_3, $score_0, $score_1, $score_2, $score_3, $nom, $adresse, $nb_trous){
 
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
-   $date = date("Y-m-d H:i:s");
+    $date = date("Y-m-d H:i:s");
 
     if(empty($joueur_0) || empty($score_0) || empty($nom) || empty($adresse)){
         return false;
@@ -229,7 +229,7 @@ function enregistrer($joueur_0, $joueur_1, $joueur_2, $joueur_3, $score_0, $scor
 }
 
 function allParties($id){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "SELECT * FROM golf_enregistrer
     			WHERE (id_joueur_0 = :id || id_joueur_1 = :id || id_joueur_2 = :id || id_joueur_3 = :id)";
@@ -251,7 +251,7 @@ function allParties($id){
 }
 
 function infosPartie($id){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "SELECT * FROM golf_enregistrer WHERE id = :id";
 
@@ -285,7 +285,7 @@ function infosPartie($id){
 
 
 function addFriend($id, $idFriend){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     if(empty($id) || empty($idFriend)){
         return false;
@@ -309,7 +309,7 @@ function addFriend($id, $idFriend){
 
 function alreadyFriend($id, $idFriend){
 
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "SELECT COUNT(*) AS count FROM golf_amis WHERE id_mon = :id AND id_ami = :idFriend";
     $req = $bdd->prepare($sql);
@@ -326,7 +326,7 @@ function alreadyFriend($id, $idFriend){
 }
 
 function infosFriend($id){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "SELECT * FROM golf_users WHERE id = :id";
 
@@ -341,7 +341,7 @@ function infosFriend($id){
 }
 
 function allFriend($id){
-    $bdd = new PDO('mysql:host=justinecbase.mysql.db;dbname=justinecbase', 'justinecbase', 'JCbs1995');
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $sql = "SELECT GA.*, GU.*
     			FROM golf_amis AS GA 

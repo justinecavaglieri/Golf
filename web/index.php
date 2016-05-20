@@ -38,10 +38,10 @@ $image = $_FILES['image'];
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
     'db.options' => array(
         'driver' => 'pdo_mysql',
-        'host' => 'justinecbase.mysql.db',
-        'dbname' => 'justinecbase',
-        'user' => 'justinecbase',
-        'password' => 'JCbs1995',
+        'host' => 'xx',
+        'dbname' => 'xx',
+        'user' => 'xx',
+        'password' => 'xx',
         'charset' => 'utf8',
     ),
 ));
