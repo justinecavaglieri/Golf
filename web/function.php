@@ -84,46 +84,48 @@ function isPseudoAvailable($pseudo){
     }
 }
 
-function updateUser($id, $pseudo, $password, $HCP){
+function updateUser($id, $pseudo, $password, $HCP, $mail){
 
     $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
     $user = user($id);
 
-    $pseudo == null ? $pseudo = $user['pseudo'] : $pseudo = $pseudo ;
+    if($pseudo == null){
+        $pseudo = $user['pseudo'];
+    }else{
+        $verifPseudo = isPseudoAvailable($pseudo);
+
+        if($verifPseudo == true){
+            $pseudo = $pseudo;
+        }else{
+            return 'pseudo déjà utilisé.';
+        }
+    }
+
     $password == null ? $password = $user['password'] : $password = $password ;
     $HCP == null ? $HCP = $user['HCP'] : $HCP = $HCP ;
+    $mail == null ? $mail = $user['mail'] : $mail = $mail ;
 
     if($id != ''){
-    	 $sql = "UPDATE golf_users SET pseudo = :pseudo, password= :pass, HCP = :HCP WHERE id = :id ";
+    	 $sql = "UPDATE golf_users SET pseudo = :pseudo, password= :pass, HCP = :HCP, mail= :mail WHERE id = :id ";
 
         $req = $bdd->prepare($sql);
         $req->execute(array(
             ':pass' => $password,
             ':pseudo' => $pseudo,
             ':HCP' => $HCP,
-            ':id' => $id
+            ':id' => $id,
+            ':mail' => $mail
         ));
 
-        return true;
+        if($req->execute($params)){
+            return true;
+        } else{
+            return false;
+        }
     }else{
     	return false;
     }
-
-}
-
-function deleteUser ($id){
-
-    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
-
-    $sql = "DELETE FROM golf_users WHERE id = :id";
-
-    $req = $bdd->prepare($sql);
-    $req->execute(array(
-        ':id' => $id
-    ));
-    return true;
-
 
 }
 
@@ -209,19 +211,37 @@ function updateProfilPicture($imgInfos, $user_id){
 
 }
 
-function enregistrer($joueur_0, $joueur_1, $joueur_2, $joueur_3, $score_0, $score_1, $score_2, $score_3, $nom, $adresse, $nb_trous){
+function enregistrer($joueur_0, $joueur_1, $joueur_2, $joueur_3, $score_0, $score_1, $score_2, $score_3, $nom, $adresse, $nb_trous, $joueur_gagnant){
 
     $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
-    $date = date("Y-m-d H:i:s");
+   $date = date("Y-m-d H:i:s");
 
-    if(empty($joueur_0) || empty($score_0) || empty($nom) || empty($adresse)){
+    if(empty($joueur_0) || empty($score_0) || empty($nom) || empty($adresse) || empty($joueur_gagnant)){
         return false;
     } else{
-        $sql = "INSERT INTO golf_enregistrer (id_joueur_0, id_joueur_1, id_joueur_2, id_joueur_3, score_j0, score_j1 , score_j2 , score_j3, date, nom , adresse , nb_trous) VALUES ('".$joueur_0."','".$joueur_1."','".$joueur_2."','".$joueur_3."','".$score_0."','".$score_1."','".$score_2."','".$score_3."', '".$date."', '".$nom."','".$adresse."','".$nb_trous."')";
+        $sql = "INSERT INTO golf_enregistrer (id_joueur_0, id_joueur_1, id_joueur_2, id_joueur_3, score_j0, score_j1 , score_j2 , score_j3, date, nom , adresse , nb_trous, joueur_gagnant) VALUES ('".$joueur_0."','".$joueur_1."','".$joueur_2."','".$joueur_3."','".$score_0."','".$score_1."','".$score_2."','".$score_3."', '".$date."', '".$nom."','".$adresse."','".$nb_trous."','".$joueur_gagnant."')";
 
         $req = $bdd->prepare($sql);
         $req->execute();
+
+        $joueur = array();
+        if($joueur_0 != '0') $joueur[] .= $joueur_0;
+        if($joueur_1 != '0') $joueur[] .= $joueur_1;
+        if($joueur_2 != '0') $joueur[] .= $joueur_2;
+        if($joueur_3 != '0') $joueur[] .= $joueur_3;
+
+        $response = array();
+        for($i=0; $i<count($joueur); $i++){
+
+            $changeStatut = "UPDATE golf_users SET partie_jouee = (SELECT COUNT(*) FROM golf_enregistrer WHERE (id_joueur_1 = :id_joueur OR id_joueur_2 = :id_joueur OR id_joueur_3 = :id_joueur OR id_joueur_0 = :id_joueur)), partie_gagnee = (SELECT COUNT(*) FROM golf_enregistrer WHERE joueur_gagnant = :id_joueur), winrate = ((partie_gagnee / partie_jouee)*100) WHERE id = :id_joueur";
+            $req1 = $bdd->prepare($changeStatut);
+            $req1->execute(array(
+                ':id_joueur' => $joueur[$i]
+            ));
+            $response[] = $req1->fetch(PDO::FETCH_ASSOC);
+        }
+        
 
         return true;
     }
@@ -284,55 +304,101 @@ function infosPartie($id){
 }
 
 
-function addFriend($id, $idFriend){
+function addFriend($id, $pseudoFriend){
     $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
-    if(empty($id) || empty($idFriend)){
+    if(empty($id) || empty($pseudoFriend)){
         return false;
     } else{
-        $verifFriend = alreadyFriend($id, $idFriend);
+        $verifyFriend = alreadyFriend($id, $pseudoFriend);
+        $verifyPseudo = pseudoExist($pseudoFriend);
 
-        if($verifFriend == true){
-            $sql = "INSERT INTO golf_amis SET id_mon = :id, id_ami = :idFriend";
+
+		if($verifyPseudo == false){
+            return 'Pseudo non trouvé.';
+
+        } else if(($verifyFriend == true) AND ($verifyPseudo == true)){
+        	return 'Vous êtes déjà ami.';
+
+        }elseif(($verifyFriend == false) AND ($verifyPseudo == true)){
+
+            $idFriend = "SELECT * FROM golf_users WHERE pseudo = :pseudoFriend";
+
+            
+            $reqFriend = $bdd->prepare($idFriend);
+            $reqFriend->execute(array(
+                ':pseudoFriend' => $pseudoFriend
+            ));
+            $result = $reqFriend->fetch(PDO::FETCH_ASSOC);
+
+            $sql = "INSERT INTO golf_amis SET id_mon = :id, pseudo_ami = :pseudoFriend, id_ami = :idFriend";
 
 	        $req = $bdd->prepare($sql);
 	        $req->execute(array(
 	            ':id' => $id,
-	            ':idFriend' => $idFriend
+	            ':pseudoFriend' => $pseudoFriend,
+                ':idFriend' => $result['id']
 	        ));
+
             return true;
-        } else{
-            return 'Vous êtes déjà ami.';
-        }
+        } 
     }
 }
 
-function alreadyFriend($id, $idFriend){
+function deleteFriend ($id, $pseudo){
 
-    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
-    $sql = "SELECT COUNT(*) AS count FROM golf_amis WHERE id_mon = :id AND id_ami = :idFriend";
+    $sql = "DELETE FROM golf_amis WHERE id_mon = :id AND pseudo_ami= :pseudo";
+
     $req = $bdd->prepare($sql);
     $req->execute(array(
         ':id' => $id,
-        ':idFriend' => $idFriend
+        ':pseudo' => $pseudo
+    ));
+    return true;
+}
+
+function alreadyFriend($id, $pseudoFriend){
+
+    $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
+
+    $sql = "SELECT COUNT(*) AS count FROM golf_amis WHERE id_mon = :id AND pseudo_ami = :pseudoFriend";
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':id' => $id,
+        ':pseudoFriend' => $pseudoFriend
     ));
     $result = $req->fetch();
     if($result['count'] > 0){
-        return false;
-    }else{
         return true;
+    }else{
+        return false;
     }
 }
 
-function infosFriend($id){
+function pseudoExist($pseudoFriend){
+
+    $sql = "SELECT COUNT(*) AS count FROM golf_users WHERE pseudo = :pseudoFriend";
+    $req = $bdd->prepare($sql);
+    $req->execute(array(
+        ':pseudoFriend' => $pseudoFriend
+    ));
+    $result = $req->fetch();
+    if($result['count'] > 0){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+function infosFriend($pseudo){
     $bdd = new PDO('mysql:host=xx;dbname=xx', 'xx', 'xx');
 
-    $sql = "SELECT * FROM golf_users WHERE id = :id";
+    $sql = "SELECT * FROM golf_users WHERE pseudo = :pseudo";
 
     $req = $bdd->prepare($sql);
     $req->execute(array(
-        ':id' => $id
+        ':pseudo' => $pseudo
     ));
 
     $result = $req->fetch(PDO::FETCH_ASSOC);

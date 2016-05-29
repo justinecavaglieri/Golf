@@ -38,10 +38,10 @@ $image = $_FILES['image'];
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
     'db.options' => array(
         'driver' => 'pdo_mysql',
-        'host' => 'xx',
-        'dbname' => 'xx',
-        'user' => 'xx',
-        'password' => 'xx',
+        'host' => 'justinecbase.mysql.db',
+        'dbname' => 'justinecbase',
+        'user' => 'justinecbase',
+        'password' => 'JCbs1995',
         'charset' => 'utf8',
     ),
 ));
@@ -90,8 +90,9 @@ $app->put('/users/edit', function (Request $request) use ($app) {
         'pseudo' => $request->request->get('pseudo'),
         'password'  => $request->request->get('password'),
         'HCP'  => $request->request->get('HCP'),
+        'mail'  => $request->request->get('mail'),
     );
-    $result = updateUser($post['id'], $post['pseudo'], $post['password'], $post['HCP']);
+    $result = updateUser($post['id'], $post['pseudo'], $post['password'], $post['HCP'], $post['mail']);
 
     return $app->json($result);
 });
@@ -117,9 +118,10 @@ $app->post('/enregistrer', function (Request $request) use ($app) {
         'nom'  => $request->request->get('nom'),
         'adresse'  => $request->request->get('adresse'),
         'nb_trous'  => $request->request->get('nb_trous'),
+        'joueurG'  => $request->request->get('joueurG'),
 
     );
-    $result = enregistrer($post['joueur0'], $post['joueur1'], $post['joueur2'], $post['joueur3'], $post['score0'], $post['score1'], $post['score2'], $post['score3'], $post['nom'], $post['adresse'], $post['nb_trous']);
+    $result = enregistrer($post['joueur0'], $post['joueur1'], $post['joueur2'], $post['joueur3'], $post['score0'], $post['score1'], $post['score2'], $post['score3'], $post['nom'], $post['adresse'], $post['nb_trous'], $post['joueurG']);
 
    
     return $app->json($result);
@@ -143,17 +145,27 @@ $app->post('/addFriend', function (Request $request) use ($app) {
 
      $post = array(
         'id' => $request->request->get('id'),
-        'idFriend'  => $request->request->get('idFriend'),
+        'pseudoFriend'  => $request->request->get('pseudoFriend'),
     );
-    $result = addFriend($post['id'], $post['idFriend']);
+    $result = addFriend($post['id'], $post['pseudoFriend']);
+
+    return $app->json($result);
+});
+$app->delete('/deleteFriend', function (Request $request) use ($app) {
+
+     $post = array(
+        'id' => $request->request->get('id'),
+        'pseudoFriend'  => $request->request->get('pseudoFriend'),
+    );
+    $result = deleteFriend($post['id'], $post['pseudoFriend']);
 
    
     return $app->json($result);
 });
 
-$app->get('/friend/{id}', function ($id) use ($app) {
+$app->get('/friend/{pseudo}', function ($pseudo) use ($app) {
 
-    $result = infosFriend($id);
+    $result = infosFriend($pseudo);
 
     return $app->json($result);
 })->assert('id', '\d+');
@@ -165,12 +177,7 @@ $app->get('/allfriends/{id}', function ($id) use ($app) {
     return $app->json($result);
 })->assert('id', '\d+');
 
-/*$app->delete('/users/{id}/delete', function ($id) use ($app) {
 
-    $result = deleteUser ($id);
-
-    return $app->json($result);
-})->assert('id', '\d+');*/
 
 
 
