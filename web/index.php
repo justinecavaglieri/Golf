@@ -118,10 +118,12 @@ $app->post('/enregistrer', function (Request $request) use ($app) {
         'nom'  => $request->request->get('nom'),
         'adresse'  => $request->request->get('adresse'),
         'nb_trous'  => $request->request->get('nb_trous'),
-        'joueurG'  => $request->request->get('joueurG'),
+        'joueurG'  => $request->request->get('joueur_gagnant'),
+        'mode'  => $request->request->get('mode'),
+        'pseudo_winner'  => $request->request->get('pseudo_winner'),
 
     );
-    $result = enregistrer($post['joueur0'], $post['joueur1'], $post['joueur2'], $post['joueur3'], $post['score0'], $post['score1'], $post['score2'], $post['score3'], $post['nom'], $post['adresse'], $post['nb_trous'], $post['joueurG']);
+    $result = enregistrer($post['joueur0'], $post['joueur1'], $post['joueur2'], $post['joueur3'], $post['score0'], $post['score1'], $post['score2'], $post['score3'], $post['nom'], $post['adresse'], $post['nb_trous'], $post['joueurG'], $post['mode'], $post['pseudo_winner']);
 
    
     return $app->json($result);
@@ -177,6 +179,25 @@ $app->get('/allfriends/{id}', function ($id) use ($app) {
     return $app->json($result);
 })->assert('id', '\d+');
 
+
+$app->post('/test', function (Request $request) use ($app) {
+
+     $post = array(
+        'all' => $request->request->get('all'),
+        'id' => $request->request->get('id'),
+    );
+     
+    $result = test($post['all'], $post['id']);
+
+    return $app->json($result);
+});
+
+$app->get('/getTest/{id}', function ($id) use ($app) {
+
+    $result = getTest($id);
+
+    return $app->json($result);
+})->assert('id', '\d+');
 
 
 
